@@ -18,35 +18,9 @@ def getVersionName = { String workTree ->
     return stdout.toString().trim()
 }
 
-project.ext.mcversion = "1.10.2"
-version = project.ext.mcversion + "-" + getVersionName("${project.projectDir}")
-group= "com.sudoplay.slice"
+version = getVersionName("${project.projectDir}")
+group = "com.sudoplay.slice"
 archivesBaseName = "slice"
-
-compileJava.doFirst {
-    project.sourceSets.main.java.srcDirs.each { dir ->
-        copy {
-            from dir
-            into "${project.buildDir}/modifiedSrc"
-            include "**/*.java"
-            filter {
-                it.replaceAll('@@VERSION@@', project.version)
-            }
-            filter {
-                //it.replaceAll('//@@DEPENDENCIES@@', ',dependencies = "required-after:ctkorlib@[' + project.ext.korlibversion + ',)"')
-            }
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        }
-        println "   [OK] Preprocessed [${dir}]"
-    }
-}
-compileJava.doFirst {
-    source = "${project.buildDir}/modifiedSrc"
-    classpath = project.sourceSets.main.compileClasspath
-}
-compileJava.doLast {
-    println "   [OK] Compiled [${project.name}]"
-}
 
 sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
 compileJava {
@@ -55,4 +29,13 @@ compileJava {
 
 dependencies {
     //
+}
+
+jar {
+    manifest {
+        attributes(
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': 'com.sudoplay.slice.Slice'
+        )
+    }
 }
