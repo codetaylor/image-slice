@@ -6,10 +6,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Responsible for parsing a json file into a list of image slice requests.
@@ -26,39 +26,53 @@ public class JsonParser {
 
     List<ImageSliceRequest> imageSliceRequestList = new ArrayList<>();
 
-    JSONObject slicesJsonObject = jsonObject.getJSONObject("slices");
-    Set<String> sourceImagePathSet = slicesJsonObject.keySet();
+    JSONArray sliceJsonArray = jsonObject.getJSONArray("slices");
 
-    for (String sourceImagePath : sourceImagePathSet) {
+    for (int i = 0; i < sliceJsonArray.length(); i++) {
+      JSONObject slicesArrayEntryJsonObject = sliceJsonArray.getJSONObject(i);
 
-      if ("//".equals(sourceImagePath)) {
-        continue;
+      String sourceImageString = slicesArrayEntryJsonObject.getString("sourceImage");
+      String targetPath = "";
+
+      if (slicesArrayEntryJsonObject.has("targetPath")) {
+        targetPath = slicesArrayEntryJsonObject.getString("targetPath");
       }
 
-      JSONArray sourceTargetJsonArray = slicesJsonObject.getJSONArray(sourceImagePath);
+      JSONArray sourceTargetJsonArray = slicesArrayEntryJsonObject.getJSONArray("targetSlices");
 
-      for (int i = 0; i < sourceTargetJsonArray.length(); i++) {
-        JSONObject sourceTargetJsonObject = sourceTargetJsonArray.getJSONObject(i);
-        String targetImagePath = sourceTargetJsonObject.getString("target");
-        JSONArray position = sourceTargetJsonObject.getJSONArray("position");
-        int positionX = position.getInt(0);
-        int positionY = position.getInt(1);
-
-        ImageSliceRequest request = this.imageSliceRequestFactory.create(
-            Paths.get(sourceImagePath),
-            Paths.get(targetImagePath),
-            16,
-            16,
-            positionX,
-            positionY
-        );
-
-        imageSliceRequestList.add(request);
+      for (int j = 0; j < sourceTargetJsonArray.length(); j++) {
+        imageSliceRequestList.add(this.convertJSONObjectToImageSliceRequest(
+            sourceTargetJsonArray.getJSONObject(j),
+            Paths.get(sourceImageString),
+            Paths.get(targetPath)
+        ));
       }
 
     }
 
     return imageSliceRequestList;
+
+  }
+
+  private ImageSliceRequest convertJSONObjectToImageSliceRequest(
+      JSONObject jsonObject,
+      Path sourceImagePath,
+      Path targetPath
+  ) throws JSONException {
+
+    String targetImagePath = jsonObject.getString("target");
+    JSONArray position = jsonObject.getJSONArray("position");
+    int positionX = position.getInt(0);
+    int positionY = position.getInt(1);
+
+    return this.imageSliceRequestFactory.create(
+        sourceImagePath,
+        targetPath.resolve(targetImagePath),
+        16,
+        16,
+        positionX,
+        positionY
+    );
   }
 
 }

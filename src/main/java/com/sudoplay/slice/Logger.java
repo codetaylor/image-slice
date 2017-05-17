@@ -1,5 +1,7 @@
 package com.sudoplay.slice;
 
+import java.util.regex.Matcher;
+
 /**
  * Logger
  */
@@ -19,7 +21,7 @@ public class Logger {
 
   private String resolveMessageReplacements(String message, Object[] replacements) {
     for (Object o : replacements) {
-      message = message.replaceFirst("\\{}", String.valueOf(o));
+      message = message.replaceFirst("\\{}", Matcher.quoteReplacement(String.valueOf(o)));
     }
     return message;
   }

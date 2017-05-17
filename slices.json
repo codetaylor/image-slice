@@ -1,9 +1,12 @@
 {
-  "slices": {
-    "//": "this is the source image",
-    "items.png": [
-      {"target": "targetImage1.png", "position": [0, 0], "//": "this is the target image and slice position"},
-      {"target": "targetImage2.png", "position": [1, 0]}
-    ]
-  }
+  "slices": [
+    {
+      "sourceImage": "items.png",
+      "targetPath": ".",
+      "targetSlices": [
+        {"target": "targetImage1.png", "position": [0, 0], "//": "this is the target image and slice position"},
+        {"target": "targetImage2.png", "position": [1, 0]}
+      ]
+    }
+  ]
 }
