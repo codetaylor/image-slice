@@ -3,9 +3,14 @@
     {
       "sourceImage": "items.png",
       "targetPath": ".",
+      "sliceWidth": 32,
+      "sliceHeight": 32,
       "targetSlices": [
-        {"target": "targetImage1.png", "position": [0, 0], "//": "this is the target image and slice position"},
-        {"target": "targetImage2.png", "position": [1, 0]}
+        {
+          "//": "this is the target image, slice position, slice width, and slice height",
+          "target": "targetImage1.png", "position": [0, 0], "width": 16, "height": 16
+        },
+        {"target": "targetImage2.png", "position": [0, 0]}
       ]
     }
   ]

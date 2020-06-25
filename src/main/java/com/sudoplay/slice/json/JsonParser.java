@@ -19,6 +19,7 @@ public class JsonParser {
   private ImageSliceRequestFactory imageSliceRequestFactory;
 
   public JsonParser(ImageSliceRequestFactory imageSliceRequestFactory) {
+
     this.imageSliceRequestFactory = imageSliceRequestFactory;
   }
 
@@ -32,6 +33,24 @@ public class JsonParser {
       JSONObject slicesArrayEntryJsonObject = sliceJsonArray.getJSONObject(i);
 
       String sourceImageString = slicesArrayEntryJsonObject.getString("sourceImage");
+      int sliceWidth = 16;
+
+      try {
+        sliceWidth = slicesArrayEntryJsonObject.getInt("sliceWidth");
+
+      } catch (JSONException ignore) {
+        //
+      }
+
+      int sliceHeight = 16;
+
+      try {
+        sliceHeight = slicesArrayEntryJsonObject.getInt("sliceHeight");
+
+      } catch (JSONException ignore) {
+        //
+      }
+
       String targetPath = "";
 
       if (slicesArrayEntryJsonObject.has("targetPath")) {
@@ -44,7 +63,9 @@ public class JsonParser {
         imageSliceRequestList.add(this.convertJSONObjectToImageSliceRequest(
             sourceTargetJsonArray.getJSONObject(j),
             Paths.get(sourceImageString),
-            Paths.get(targetPath)
+            Paths.get(targetPath),
+            sliceWidth,
+            sliceHeight
         ));
       }
 
@@ -57,7 +78,9 @@ public class JsonParser {
   private ImageSliceRequest convertJSONObjectToImageSliceRequest(
       JSONObject jsonObject,
       Path sourceImagePath,
-      Path targetPath
+      Path targetPath,
+      int sliceWidth,
+      int sliceHeight
   ) throws JSONException {
 
     String targetImagePath = jsonObject.getString("target");
@@ -65,11 +88,25 @@ public class JsonParser {
     int positionX = position.getInt(0);
     int positionY = position.getInt(1);
 
+    try {
+      sliceWidth = jsonObject.getInt("width");
+
+    } catch (JSONException ignore) {
+      //
+    }
+
+    try {
+      sliceHeight = jsonObject.getInt("height");
+
+    } catch (JSONException ignore) {
+      //
+    }
+
     return this.imageSliceRequestFactory.create(
         sourceImagePath,
         targetPath.resolve(targetImagePath),
-        16,
-        16,
+        sliceWidth,
+        sliceHeight,
         positionX,
         positionY
     );
